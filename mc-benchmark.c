@@ -392,7 +392,7 @@ void parseOptions(int argc, char **argv) {
 
     for (i = 1; i < argc; i++) {
         int lastarg = i==argc-1;
-        
+
         if (!strcmp(argv[i],"-c") && !lastarg) {
             config.numclients = atoi(argv[i+1]);
             i++;
@@ -515,26 +515,41 @@ int main(int argc, char **argv) {
     }
 
     do {
-        prepareForBenchmark("SET");
-        c = createClient();
-        if (!c) exit(1);
-        c->obuf = sdscatprintf(c->obuf,"set foo_rand000000000000 0 0 %d\r\n",config.datasize);
-        {
-            char *data = zmalloc(config.datasize+2);
-            memset(data,'x',config.datasize);
-            data[config.datasize] = '\r';
-            data[config.datasize+1] = '\n';
-            c->obuf = sdscatlen(c->obuf,data,config.datasize+2);
-        }
-        prepareClientForReply(c,REPLY_RETCODE);
-        createMissingClients(c);
-        aeMain(config.el);
-        endBenchmark();
+        /*prepareForBenchmark("SET");*/
+        /*c = createClient();*/
+        /*if (!c) exit(1);*/
+        /*c->obuf = sdscatprintf(c->obuf,"set foo_rand000000000000 0 0 %d\r\n",config.datasize);*/
+        /*{*/
+            /*char *data = zmalloc(config.datasize+2);*/
+            /*memset(data,'x',config.datasize);*/
+            /*data[config.datasize] = '\r';*/
+            /*data[config.datasize+1] = '\n';*/
+            /*c->obuf = sdscatlen(c->obuf,data,config.datasize+2);*/
+        /*}*/
+        /*prepareClientForReply(c,REPLY_RETCODE);*/
+        /*createMissingClients(c);*/
+        /*aeMain(config.el);*/
+        /*endBenchmark();*/
 
-        prepareForBenchmark("GET");
+        /*prepareForBenchmark("GET");*/
+        /*c = createClient();*/
+        /*if (!c) exit(1);*/
+        /*c->obuf = sdscat(c->obuf,"get foo_rand000000000000\r\n");*/
+        /*prepareClientForReply(c,REPLY_BULK);*/
+        /*createMissingClients(c);*/
+        /*aeMain(config.el);*/
+        /*endBenchmark();*/
+
+        prepareForBenchmark("GET-MULTI");
         c = createClient();
         if (!c) exit(1);
-        c->obuf = sdscat(c->obuf,"get foo_rand000000000000\r\n");
+        c->obuf=sdscat(c->obuf,"get ");
+        int i = 0;
+#define N 10000
+        for (i=0; i < N; i++){
+            c->obuf=sdscat(c->obuf, "foo_rand000000000000 ");
+        }
+        c->obuf=sdscat(c->obuf, "\r\n");
         prepareClientForReply(c,REPLY_BULK);
         createMissingClients(c);
         aeMain(config.el);
